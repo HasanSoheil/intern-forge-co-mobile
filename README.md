@@ -1,56 +1,63 @@
-# Welcome to your Expo app 👋
+# CrewLink — Mobile App (Expo / React Native)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A full-featured mobile client for the **CrewLink** internship marketplace,
+built with **Expo SDK 56** + **expo-router**. It is a complete feature-parity port
+of the web app and runs on the **same Supabase backend** (same project & keys).
 
-## Get started
+See [WEBSITE_OVERVIEW.md](./WEBSITE_OVERVIEW.md) for the full product/feature/spec
+documentation (web app + backend + this mobile app).
 
-1. Install dependencies
+## Stack
+- Expo SDK 56, React Native 0.85 (New Architecture, React Compiler)
+- expo-router (file-based routing, `src/app/`)
+- Supabase JS (`@supabase/supabase-js`) with AsyncStorage session
+- TanStack Query for data fetching/caching
+- Custom futuristic dark-first design system (expo-linear-gradient, expo-blur,
+  react-native-svg match rings, lucide-react-native icons)
+- Stripe Checkout (opened via expo-web-browser), AI scoring (Groq→Gemini→Lovable),
+  GitHub static analysis — all ported from the web app and run on-device.
 
-   ```bash
-   npm install
-   ```
+## Setup
+1. `npm install`
+2. The backend keys live in `.env` (already populated; same as the website). They
+   are injected into the app via `app.config.ts` → `extra` and read in
+   `src/lib/env.ts`. `.env` is git-ignored.
+3. Start: `npx expo start` → press `a` (Android), `i` (iOS), or scan the QR with
+   Expo Go / a dev build.
 
-2. Start the app
+> **Security note (FYP/demo):** secret keys (Supabase service role, Stripe secret,
+> AI keys) are bundled into the app. On the web these run only server-side. For a
+> production release, move AI scoring, Stripe, and admin/account-deletion to
+> **Supabase Edge Functions** and ship the app with only the publishable key.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+## Project structure
+```
+src/
+  app/                       # expo-router routes (thin — delegate to features/)
+    _layout.tsx              # providers + auth gate
+    index.tsx                # public landing
+    (auth)/                  # sign-in / sign-up
+    onboarding.tsx           # student 3-step onboarding
+    (app)/
+      _layout.tsx            # student-onboarding gate + detail stack
+      (tabs)/                # role-aware bottom tab bar (index/browse/discover/messages/more)
+      internships/[id], challenges/[id], students/[id], messages/[threadId], …
+  features/                  # screen implementations grouped by domain
+  components/ui/             # design-system kit (Text, Button, Card, MatchRing, …)
+  components/StudentFeed.tsx # portfolio feed (posts + media upload)
+  context/auth-context.tsx   # session + role
+  theme/                     # tokens + ThemeProvider (dark/light/system)
+  lib/                       # supabase, env, matching, github, submissions, billing,
+                             # catalog, account, utils
+  integrations/supabase/types.ts  # generated DB types (shared with web)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Feature parity
+Students: home/top-matches, internships, internship detail + apply (GitHub repo →
+AI score), platform challenges + AI report, applications, invitations, profile
+(strength, stats, portfolio feed, profile views), notifications, messaging.
+Companies: dashboard, post internship (+ coding challenge), applicants (ranked,
+accept/reject), matched students + invite, sent invitations, interns, profile +
+Stripe plan checkout, messaging. Admin: users / fields & skills / plans / platform
+challenges management + stats. Shared: settings (theme, password, notif prefs,
+delete account), realtime chat.
