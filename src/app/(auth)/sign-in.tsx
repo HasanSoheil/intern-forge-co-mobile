@@ -22,16 +22,7 @@ export default function SignIn() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setLoading(false);
-    if (error) {
-      // Account exists but was never verified — send a fresh code and take
-      // them to the verification step instead of a dead-end error.
-      if (error.code === "email_not_confirmed") {
-        await supabase.auth.resend({ type: "signup", email: email.trim() });
-        toast.error("Please verify your email first — we sent you a new code");
-        return router.push({ pathname: "/(auth)/verify-email", params: { email: email.trim() } });
-      }
-      return toast.error(error.message);
-    }
+    if (error) return toast.error(error.message);
     toast.success("Welcome back!");
     router.replace("/(app)");
   };

@@ -34,15 +34,15 @@ export default function SignUp() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    // Email confirmation is required, so no session is returned yet — the user
-    // must enter the 6-digit code we just emailed them. (If confirmation is
-    // ever disabled again, a session comes back and we skip straight in.)
-    if (data.session) {
-      toast.success("Account created!");
-      return router.replace("/(app)");
+    // Signups are auto-confirmed (no email verification), so a session comes
+    // back immediately. The null-session case only happens if confirmation is
+    // ever re-enabled in the Supabase dashboard.
+    if (!data.session) {
+      toast.success("Account created — check your email to confirm, then sign in");
+      return router.replace("/(auth)/sign-in");
     }
-    toast.success("Account created — check your email!");
-    router.push({ pathname: "/(auth)/verify-email", params: { email: email.trim() } });
+    toast.success("Account created!");
+    router.replace("/(app)");
   };
 
   const RoleCard = ({ value, icon, title, sub }: { value: Role; icon: React.ReactNode; title: string; sub: string }) => {
